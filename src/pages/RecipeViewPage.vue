@@ -1,62 +1,102 @@
 <template>
-  <div class="container">
+  <div class="container py-5">
     <div v-if="recipe" class="recipe-detail">
-      <div class="recipe-header">
-        <h1 class="title">{{ recipe.title }}</h1>
-        <div class="recipe-meta">
-          <span class="meta-item">
-            <i class="far fa-clock"></i> Ready in {{ recipe.readyInMinutes }} minutes
-          </span>
-          <span class="meta-item">
-            <i class="far fa-heart"></i> {{ recipe.aggregateLikes }} likes
-          </span>
+      <div class="row mb-4">
+        <div class="col-12 text-center">
+          <h1 class="display-4 fw-bold">{{ recipe.title }}</h1>
+          
+          <div class="d-flex flex-wrap justify-content-center gap-3 mt-3">
+            <span class="badge bg-light text-dark p-2 d-flex align-items-center">
+              <i class="far fa-clock text-primary me-2"></i> {{ recipe.readyInMinutes }} minutes
+            </span>
+            <span class="badge bg-light text-dark p-2 d-flex align-items-center">
+              <i class="far fa-heart text-danger me-2"></i> {{ recipe.aggregateLikes }} likes
+            </span>
+          </div>
+          
+          <!-- Dietary Information -->
+          <div class="mt-3 d-flex flex-wrap justify-content-center gap-2">
+            <span v-if="recipe.vegan" class="badge bg-success p-2">
+              <i class="fas fa-leaf me-1"></i> Vegan
+            </span>
+            <span v-if="recipe.vegetarian && !recipe.vegan" class="badge bg-info p-2">
+              <i class="fas fa-seedling me-1"></i> Vegetarian
+            </span>
+            <span v-if="recipe.glutenFree" class="badge bg-warning text-dark p-2">
+              <i class="fas fa-bread-slice me-1"></i> Gluten-Free
+            </span>
+          </div>
         </div>
       </div>
       
-      <div class="recipe-image-container">
-        <img v-if="recipe.image" :src="recipe.image" :alt="recipe.title" class="recipe-image" />
-        <div v-else class="recipe-image-placeholder">
-          <i class="fas fa-utensils"></i>
+      <div class="row mb-5">
+        <div class="col-md-8 offset-md-2">
+          <div class="card shadow-sm border-0 overflow-hidden">
+            <img v-if="recipe.image" :src="recipe.image" :alt="recipe.title" class="card-img-top recipe-hero-image" />
+            <div v-else class="recipe-image-placeholder bg-light text-primary p-5 text-center">
+              <i class="fas fa-utensils fa-4x"></i>
+            </div>
+          </div>
         </div>
       </div>
       
-      <div class="recipe-content">
-        <div class="recipe-section ingredients-section">
-          <h2 class="section-title"><i class="fas fa-list"></i> Ingredients</h2>
-          <ul class="ingredients-list">
-            <li v-for="(ingredient, index) in recipe.extendedIngredients" 
-                :key="index + '_' + ingredient.id" 
-                class="ingredient-item">
-              {{ ingredient.original }}
-            </li>
-          </ul>
+      <div class="row mb-5">
+        <div class="col-md-5">
+          <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-primary text-white">
+              <h2 class="h5 mb-0"><i class="fas fa-list me-2"></i> Ingredients</h2>
+            </div>
+            <div class="card-body">
+              <ul class="list-group list-group-flush ingredients-list">
+                <li v-for="(ingredient, index) in recipe.extendedIngredients" 
+                    :key="index + '_' + ingredient.id" 
+                    class="list-group-item border-0 py-2">
+                  <i class="fas fa-check-circle text-success me-2"></i>
+                  {{ ingredient.original }}
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
         
-        <div class="recipe-section instructions-section">
-          <h2 class="section-title"><i class="fas fa-tasks"></i> Instructions</h2>
-          <ol class="instructions-list">
-            <li v-for="step in recipe._instructions" 
-                :key="step.number" 
-                class="instruction-step">
-              {{ step.step }}
-            </li>
-          </ol>
+        <div class="col-md-7">
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white">
+              <h2 class="h5 mb-0"><i class="fas fa-tasks me-2"></i> Instructions</h2>
+            </div>
+            <div class="card-body">
+              <ol class="list-group list-group-flush instruction-steps">
+                <li v-for="step in recipe._instructions" 
+                    :key="step.number" 
+                    class="list-group-item border-0 py-3 d-flex">
+                  <span class="step-number bg-primary text-white rounded-circle me-3">{{ step.number || '•' }}</span>
+                  <span>{{ step.step }}</span>
+                </li>
+              </ol>
+            </div>
+          </div>
         </div>
       </div>
       
-      <div class="action-buttons">
-        <button class="action-button back-button" @click="$router.go(-1)">
-          <i class="fas fa-arrow-left"></i> Back
-        </button>
-        <button class="action-button save-button">
-          <i class="far fa-bookmark"></i> Save Recipe
-        </button>
+      <div class="row">
+        <div class="col-12 d-flex justify-content-between">
+          <button class="btn btn-outline-primary" @click="$router.go(-1)">
+            <i class="fas fa-arrow-left me-2"></i> Back
+          </button>
+          <button class="btn btn-primary">
+            <i class="far fa-bookmark me-2"></i> Save Recipe
+          </button>
+        </div>
       </div>
     </div>
     
-    <div v-else class="loading-container">
-      <div class="loading-spinner"></div>
-      <p>Loading recipe details...</p>
+    <div v-if="!recipe" class="row justify-content-center py-5">
+      <div class="col-md-6 text-center">
+        <div class="spinner-border text-primary mb-3" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted">Loading recipe details...</p>
+      </div>
     </div>
   </div>
 </template>
@@ -72,11 +112,9 @@ export default {
   async created() {
     try {
       let response;
-      // response = this.$route.params.response;
 
       try {
         response = await this.axios.get(
-          // "https://test-for-3-2.herokuapp.com/recipes/info",
           this.$root.store.server_domain + "/recipes/info",
           {
             params: { id: this.$route.params.recipeId }
@@ -91,37 +129,67 @@ export default {
         return;
       }
 
+      // Handle different response structures (from API vs from "Surprise Me")
+      let recipeData = response.data.recipe || response.data;
+      
       let {
-        analyzedInstructions,
-        instructions,
-        extendedIngredients,
-        aggregateLikes,
-        readyInMinutes,
-        image,
-        title
-      } = response.data.recipe;
+        analyzedInstructions = [],
+        instructions = "",
+        extendedIngredients = [],
+        aggregateLikes = 0,
+        readyInMinutes = 0,
+        image = "",
+        title = "",
+        vegan = false,
+        vegetarian = false,
+        glutenFree = false
+      } = recipeData;
+
+      // If the response is from our random API, we might need to adjust
+      if (!analyzedInstructions || analyzedInstructions.length === 0) {
+        // Create a simple instruction step if missing
+        analyzedInstructions = [{
+          name: "Instructions: ",
+          steps: [{ step: instructions || "No detailed instructions available." }]
+        }];
+      }
 
       let _instructions = analyzedInstructions
         .map((fstep) => {
-          fstep.steps[0].step = fstep.name + fstep.steps[0].step;
-          return fstep.steps;
+          if (fstep.steps && fstep.steps.length > 0) {
+            fstep.steps[0].step = (fstep.name || "") + fstep.steps[0].step;
+          }
+          return fstep.steps || [];
         })
         .reduce((a, b) => [...a, ...b], []);
+
+      // If no extended ingredients but we have simple ingredients
+      if ((!extendedIngredients || extendedIngredients.length === 0) && recipeData.ingredients) {
+        extendedIngredients = recipeData.ingredients.map(ing => ({
+          original: ing,
+          id: Math.random().toString(36).substring(7)
+        }));
+      }
 
       let _recipe = {
         instructions,
         _instructions,
         analyzedInstructions,
         extendedIngredients,
-        aggregateLikes,
+        aggregateLikes: aggregateLikes || recipeData.popularity || 0,
         readyInMinutes,
         image,
-        title
+        title,
+        vegan,
+        vegetarian, 
+        glutenFree
       };
 
       this.recipe = _recipe;
+      console.log("Recipe data processed:", this.recipe);
     } catch (error) {
-      console.log(error);
+      console.log("Error processing recipe data:", error);
+      this.$router.replace("/NotFound");
     }
   }
 };
@@ -132,217 +200,74 @@ export default {
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 /* Font Awesome for icons */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
+/* Bootstrap CSS */
+@import url('https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css');
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px;
-  font-family: 'Poppins', sans-serif;
-  color: #333;
-}
-
-/* Recipe Header */
-.recipe-header {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.title {
-  font-size: 3rem;
-  font-weight: 700;
-  color: #1a73e8;
-  margin-bottom: 15px;
-}
-
-.recipe-meta {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  color: #666;
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  font-size: 1.1rem;
-}
-
-.meta-item i {
-  margin-right: 8px;
-  color: #1a73e8;
-}
-
-/* Recipe Image */
-.recipe-image-container {
+/* Recipe Hero Image */
+.recipe-hero-image {
   width: 100%;
-  max-width: 800px;
   height: 400px;
-  margin: 0 auto 40px;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
-.recipe-image {
-  width: 100%;
-  height: 100%;
   object-fit: cover;
 }
 
-.recipe-image-placeholder {
-  width: 100%;
-  height: 100%;
+/* Step Number Style */
+.step-number {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f0f5ff;
-  color: #1a73e8;
-  font-size: 5rem;
+  min-width: 28px;
+  height: 28px;
+  font-weight: bold;
+  flex-shrink: 0;
 }
 
-/* Recipe Content */
-.recipe-content {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 30px;
-  margin-bottom: 40px;
+/* Card Hover Effect */
+.card {
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
-.recipe-section {
-  flex: 1;
-  min-width: 300px;
-  background-color: white;
-  border-radius: 16px;
-  padding: 30px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+.card:hover {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
 }
 
-.section-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
+/* Button Animations */
+.btn {
+  transition: all 0.3s ease;
 }
 
-.section-title i {
-  margin-right: 10px;
-  color: #1a73e8;
+.btn-primary:hover, .btn-outline-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Ingredients */
-.ingredients-list {
-  list-style-type: none;
-  padding: 0;
+/* Hover effect for ingredients and instructions */
+.list-group-item {
+  transition: background-color 0.2s;
 }
 
-.ingredient-item {
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
-  position: relative;
-  padding-left: 25px;
+.list-group-item:hover {
+  background-color: rgba(26, 115, 232, 0.05);
 }
 
-.ingredient-item:before {
-  content: "•";
-  color: #1a73e8;
-  font-size: 1.5rem;
-  position: absolute;
-  left: 0;
-  top: 5px;
+/* Animation for page load */
+.recipe-detail {
+  animation: fadeIn 0.5s ease-out;
 }
 
-.ingredient-item:last-child {
-  border-bottom: none;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Instructions */
-.instructions-list {
-  padding-left: 20px;
+/* Adjust text sizes for better hierarchy */
+.display-4 {
+  font-weight: 700 !important;
+  font-size: calc(1.5rem + 2.4vw) !important;
 }
 
-.instruction-step {
-  margin-bottom: 15px;
-  line-height: 1.6;
-}
-
-/* Action Buttons */
-.action-buttons {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 30px;
-}
-
-.action-button {
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  border: none;
-  transition: all 0.3s;
-}
-
-.action-button i {
-  margin-right: 8px;
-}
-
-.back-button {
-  background-color: #f0f0f0;
-  color: #555;
-}
-
-.back-button:hover {
-  background-color: #e0e0e0;
-}
-
-.save-button {
-  background-color: #1a73e8;
-  color: white;
-}
-
-.save-button:hover {
-  background-color: #0d62c9;
-}
-
-/* Loading State */
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  color: #666;
-}
-
-.loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid rgba(26, 115, 232, 0.1);
-  border-radius: 50%;
-  border-top-color: #1a73e8;
-  animation: spin 1s linear infinite;
-  margin-bottom: 20px;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .recipe-image-container {
-    height: 300px;
-  }
-  
-  .title {
-    font-size: 2.2rem;
-  }
-  
-  .recipe-content {
-    flex-direction: column;
+@media (min-width: 768px) {
+  .display-4 {
+    font-size: calc(1.8rem + 1.5vw) !important;
   }
 }
 </style>

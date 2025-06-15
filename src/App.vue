@@ -1,41 +1,47 @@
 <template>
   <div id="app">
-    <nav class="navbar">
-      <div class="navbar-container">
-        <div class="navbar-logo">
-          <router-link :to="{ name: 'main' }" class="logo-link">
-            <i class="fas fa-utensils"></i>
-            <span>Recipe Explorer</span>
-          </router-link>
-        </div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+      <div class="container">
+        <router-link :to="{ name: 'main' }" class="navbar-brand d-flex align-items-center">
+          <i class="fas fa-utensils text-primary me-2"></i>
+          <span class="fw-bold">Recipe Explorer</span>
+        </router-link>
         
-        <div class="navbar-links">
-          <router-link :to="{ name: 'main' }" class="nav-link">
-            <i class="fas fa-home"></i> Home
-          </router-link>
-          <router-link :to="{ name: 'search' }" class="nav-link">
-            <i class="fas fa-search"></i> Search
-          </router-link>
-        </div>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
         
-        <div class="navbar-auth">
-          <div v-if="!store.username" class="guest-menu">
-            <router-link :to="{ name: 'register' }" class="auth-button register-button">
-              <i class="fas fa-user-plus"></i> Register
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <router-link :to="{ name: 'main' }" class="nav-link">
+                <i class="fas fa-home me-1"></i> Home
+              </router-link>
+            </li>
+            <li class="nav-item">
+              <router-link :to="{ name: 'search' }" class="nav-link">
+                <i class="fas fa-search me-1"></i> Search
+              </router-link>
+            </li>
+          </ul>
+          
+          <div v-if="!store.username" class="d-flex">
+            <router-link :to="{ name: 'register' }" class="btn btn-outline-primary me-2">
+              <i class="fas fa-user-plus me-1"></i> Register
             </router-link>
-            <router-link :to="{ name: 'login' }" class="auth-button login-button">
-              <i class="fas fa-sign-in-alt"></i> Login
+            <router-link :to="{ name: 'login' }" class="btn btn-primary">
+              <i class="fas fa-sign-in-alt me-1"></i> Login
             </router-link>
           </div>
-          <div v-else class="user-menu">
-            <div class="user-profile">
-              <div class="user-avatar">
+          <div v-else class="d-flex align-items-center">
+            <div class="me-3 d-flex align-items-center">
+              <div class="avatar-circle me-2 bg-primary text-white">
                 <i class="fas fa-user"></i>
               </div>
-              <span class="username">{{ store.username }}</span>
+              <span class="fw-bold">{{ store.username }}</span>
             </div>
-            <button @click="logout" class="auth-button logout-button">
-              <i class="fas fa-sign-out-alt"></i> Logout
+            <button @click="logout" class="btn btn-outline-danger">
+              <i class="fas fa-sign-out-alt me-1"></i> Logout
             </button>
           </div>
         </div>
@@ -74,6 +80,8 @@ export default {
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 /* Font Awesome for icons */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
+/* Bootstrap CSS */
+@import url('https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css');
 
 #app {
   font-family: 'Poppins', sans-serif;
@@ -84,23 +92,53 @@ export default {
   background-color: #f8f9fa;
 }
 
-/* Modern Navbar Styling */
+/* Custom Styles */
 .navbar {
-  background-color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  padding: 0;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+  padding: 12px 0;
 }
 
-.navbar-container {
-  max-width: 1200px;
-  margin: 0 auto;
+.navbar-brand {
+  font-size: 1.4rem;
+}
+
+.avatar-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
+  justify-content: center;
+  font-size: 0.8rem;
+}
+
+/* Override Bootstrap primary color */
+.btn-primary, .bg-primary, .text-primary {
+  --bs-primary: #1a73e8;
+  --bs-primary-rgb: 26, 115, 232;
+}
+
+.btn-primary {
+  background-color: #1a73e8;
+  border-color: #1a73e8;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background-color: #0d62c9;
+  border-color: #0d62c9;
+}
+
+.btn-outline-primary {
+  color: #1a73e8;
+  border-color: #1a73e8;
+}
+
+.btn-outline-primary:hover, .btn-outline-primary:focus {
+  background-color: #1a73e8;
+  border-color: #1a73e8;
+}
+
+.text-primary {
+  color: #1a73e8 !important;
 }
 
 /* Logo Styling */
