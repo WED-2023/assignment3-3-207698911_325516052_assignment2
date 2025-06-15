@@ -45,8 +45,14 @@
           </div>
         </div>
         
-        <button type="submit" class="submit-button">
-          <i class="fas fa-sign-in-alt"></i> Login
+        <div v-if="errorMessage" class="error-message alert">
+          <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
+        </div>
+        
+        <button type="submit" class="submit-button" :disabled="loading">
+          <i v-if="!loading" class="fas fa-sign-in-alt"></i>
+          <i v-else class="fas fa-spinner fa-spin"></i>
+          {{ loading ? 'Signing in...' : 'Login' }}
         </button>
         
         <div class="form-footer">
@@ -58,9 +64,10 @@
 </template>
 
 <script>
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { useVuelidate } from '@vuelidate/core';
 import { required, minLength } from '@vuelidate/validators';
+import axios from 'axios';
 
 export default {
   name: "LoginPage",
@@ -69,6 +76,9 @@ export default {
       username: '',
       password: '',
     });
+    
+    const loading = ref(false);
+    const errorMessage = ref(null);
 
     const rules = {
       username: { required },
@@ -79,23 +89,58 @@ export default {
 
     const login = async () => {
       if (await v$.value.$validate()) {
-        // קריאה לשרת
+        loading.value = true;
+        errorMessage.value = null;
+        
         try {
-          await window.axios.post('/login', {
+          console.log("Attempting login with:", {
             username: state.username,
             password: state.password
           });
-          window.store.login(state.username);
-          window.router.push('/main');
+          
+          // Use the baseURL from the store
+          const baseURL = window.store.server_domain || 'http://localhost:3000';
+          console.log("Using server URL:", baseURL);
+          
+          const response = await axios.post(`${baseURL}/login`, {
+            username: state.username,
+            password: state.password
+          }, {
+            withCredentials: true
+          });
+          
+          console.log("Login response:", response);
+          
+          if (response && response.data && response.data.success) {
+            window.store.login(state.username);
+            window.router.push('/main');
+          } else {
+            errorMessage.value = "Login failed with unexpected response";
+            console.error("Unexpected response:", response);
+          }
         } catch (err) {
-          window.toast("Login failed", err.response.data.message, "danger");
+          console.error("Login error:", err);
+          
+          if (err.response && err.response.data && err.response.data.message) {
+            errorMessage.value = err.response.data.message;
+            // window.toast("Login failed", err.response.data.message, "danger");
+
+          } else if (err.message) {
+            errorMessage.value = `Error: ${err.message}`;
+            // window.toast("Login failed", err.message, "danger");
+          } else {
+            errorMessage.value = "Unknown error occurred";
+            // window.toast("Login failed", "Unknown error occurred", "danger");
+          }
+        } finally {
+          loading.value = false;
         }
       }
     };
 
     expose({ login });
 
-    return { state, v$, login };
+    return { state, v$, login, loading, errorMessage };
   }
 };
 </script>
@@ -194,6 +239,21 @@ export default {
   margin-top: 8px;
 }
 
+.error-message.alert {
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.error-message.alert i {
+  margin-right: 8px;
+  color: #ff4d4f;
+}
+
 .submit-button {
   width: 100%;
   padding: 15px;
@@ -210,6 +270,20 @@ export default {
 
 .submit-button:hover {
   background-color: #0d62c9;
+}
+
+.submit-button:disabled {
+  background-color: #a8c7f0;
+  cursor: not-allowed;
+}
+
+.fa-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .form-footer {

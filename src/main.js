@@ -10,10 +10,43 @@ import 'bootstrap/dist/js/bootstrap.bundle.js';
 
 import store from './store';
 
+// Set up Axios with default configs
+axios.defaults.withCredentials = true;
+
+// Add request interceptor for debugging
+axios.interceptors.request.use(
+  config => {
+    console.log('Starting Request', config);
+    return config;
+  },
+  error => {
+    console.error('Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor for debugging
+axios.interceptors.response.use(
+  response => {
+    console.log('Response:', response);
+    return response;
+  },
+  error => {
+    console.error('Response Error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Make axios available globally
+window.axios = axios;
+
 const router = createRouter({
   history: createWebHistory(),
   routes
 });
+
+// Make router available globally
+window.router = router;
 
 const app = createApp(App);
 
@@ -21,6 +54,9 @@ app.use(router);
 app.use(VueAxios, axios);
 
 app.config.globalProperties.store = store;
+
+// Make store available globally
+window.store = store;
 
 app.config.globalProperties.toast = function (title, content, variant = null, append = false) {
   const toastContainerId = "toast-container";
