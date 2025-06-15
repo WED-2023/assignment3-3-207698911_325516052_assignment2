@@ -99,9 +99,9 @@
                   <i class="far fa-heart text-danger me-1"></i> {{ recipe.popularity }}
                 </span>
               </div>
-              <a :href="'#/recipe/' + recipe.id" class="btn btn-primary mt-auto">
+              <router-link :to="{ name: 'recipe', params: { recipeId: recipe.id } }" class="btn btn-primary mt-auto">
                 View Recipe Details
-              </a>
+              </router-link>
             </div>
           </div>
         </div>
@@ -162,7 +162,7 @@ export default {
       this.rawResponse = null;
       
       try {
-        const response = await axios.get(`http://localhost:3000/recipes/search`, {
+        const response = await axios.get(`${this.$root.store.server_domain}/recipes/search`, {
           params: { query: this.searchQuery }
         });
         // Store the raw response for debugging
@@ -192,7 +192,7 @@ export default {
       this.rawResponse = null;
       
       try {
-        const response = await axios.get('http://localhost:3000/recipes/random');
+        const response = await axios.get(`${this.$root.store.server_domain}/recipes/random`);
         
         // Store the raw response for debugging
         this.rawResponse = JSON.stringify(response.data, null, 2);

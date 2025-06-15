@@ -12,6 +12,9 @@
             <span class="badge bg-light text-dark p-2 d-flex align-items-center">
               <i class="far fa-heart text-danger me-2"></i> {{ recipe.aggregateLikes }} likes
             </span>
+            <span v-if="recipe.servings" class="badge bg-light text-dark p-2 d-flex align-items-center">
+              <i class="fas fa-utensils text-success me-2"></i> {{ recipe.servings }} servings
+            </span>
           </div>
           
           <!-- Dietary Information -->
@@ -35,6 +38,11 @@
             <img v-if="recipe.image" :src="recipe.image" :alt="recipe.title" class="card-img-top recipe-hero-image" />
             <div v-else class="recipe-image-placeholder bg-light text-primary p-5 text-center">
               <i class="fas fa-utensils fa-4x"></i>
+            </div>
+            
+            <div v-if="recipe.summary" class="card-body">
+              <h3 class="h5 mb-3 fw-bold">About this recipe</h3>
+              <div class="recipe-summary" v-html="recipe.summary"></div>
             </div>
           </div>
         </div>
@@ -66,8 +74,9 @@
             </div>
             <div class="card-body">
               <ol class="list-group list-group-flush instruction-steps">
-                <li v-for="step in recipe._instructions" 
+                <li v-for="(step, index) in recipe._instructions" 
                     :key="step.number" 
+                    :style="{ 'animation-delay': index * 0.1 + 's' }"
                     class="list-group-item border-0 py-3 d-flex">
                   <span class="step-number bg-primary text-white rounded-circle me-3">{{ step.number || '•' }}</span>
                   <span>{{ step.step }}</span>
@@ -111,84 +120,110 @@ export default {
   },
   async created() {
     try {
+      const recipeId = this.$route.params.recipeId;
       let response;
 
       try {
-        response = await this.axios.get(
-          this.$root.store.server_domain + "/recipes/info",
-          {
-            params: { id: this.$route.params.recipeId }
-          }
-        );
-
-        // console.log("response.status", response.status);
-        if (response.status !== 200) this.$router.replace("/NotFound");
+        // Use the base URL from the store
+        response = await this.axios.get(`${this.$root.store.server_domain}/recipes/${recipeId}`);
+        console.log("API Response:", response.data);
+        
+        if (response.status !== 200) {
+          this.$router.replace("/NotFound");
+          return;
+        }
       } catch (error) {
-        console.log("error.response.status", error.response.status);
+        console.error("Error fetching recipe:", error);
         this.$router.replace("/NotFound");
         return;
       }
 
-      // Handle different response structures (from API vs from "Surprise Me")
-      let recipeData = response.data.recipe || response.data;
+      // Extract the recipe data directly from the response
+      const recipeData = response.data;
       
-      let {
-        analyzedInstructions = [],
-        instructions = "",
-        extendedIngredients = [],
-        aggregateLikes = 0,
+      // Extract fields from the response based on the expected format
+      const {
+        id,
+        title = "",
         readyInMinutes = 0,
         image = "",
-        title = "",
+        popularity = 0,
         vegan = false,
         vegetarian = false,
-        glutenFree = false
+        glutenFree = false,
+        servings = 0,
+        summary = "",
+        ingredients = [],
+        instructions = []
       } = recipeData;
-
-      // If the response is from our random API, we might need to adjust
-      if (!analyzedInstructions || analyzedInstructions.length === 0) {
-        // Create a simple instruction step if missing
-        analyzedInstructions = [{
-          name: "Instructions: ",
-          steps: [{ step: instructions || "No detailed instructions available." }]
+      
+      // Create a standardized instructions format for the template
+      let _instructions = [];
+      
+      if (instructions && instructions.length > 0) {
+        // Handle the analyzed instructions format
+        _instructions = instructions
+          .map(section => {
+            if (section.steps && section.steps.length > 0) {
+              // Add section name to first step if it exists
+              const steps = [...section.steps];
+              if (section.name && steps.length > 0) {
+                steps[0] = {
+                  ...steps[0],
+                  step: section.name + ": " + steps[0].step
+                };
+              }
+              return steps;
+            }
+            return [];
+          })
+          .flat()
+          .map((step, index) => ({
+            ...step,
+            number: step.number || index + 1
+          }));
+      } else {
+        // Create a simple step if no instructions are available
+        _instructions = [{ 
+          number: 1, 
+          step: "No detailed instructions available."
         }];
       }
+      
+      // Create a standardized ingredients format
+      const extendedIngredients = ingredients.map(ing => {
+        if (typeof ing === 'string') {
+          // Handle case where ingredient is just a string
+          return {
+            id: Math.random().toString(36).substring(7),
+            original: ing
+          };
+        }
+        // Assume it's already in the right format or has an 'original' field
+        return ing;
+      });
 
-      let _instructions = analyzedInstructions
-        .map((fstep) => {
-          if (fstep.steps && fstep.steps.length > 0) {
-            fstep.steps[0].step = (fstep.name || "") + fstep.steps[0].step;
-          }
-          return fstep.steps || [];
-        })
-        .reduce((a, b) => [...a, ...b], []);
-
-      // If no extended ingredients but we have simple ingredients
-      if ((!extendedIngredients || extendedIngredients.length === 0) && recipeData.ingredients) {
-        extendedIngredients = recipeData.ingredients.map(ing => ({
-          original: ing,
-          id: Math.random().toString(36).substring(7)
-        }));
-      }
-
-      let _recipe = {
-        instructions,
-        _instructions,
-        analyzedInstructions,
-        extendedIngredients,
-        aggregateLikes: aggregateLikes || recipeData.popularity || 0,
+      // Create the final recipe object
+      const _recipe = {
+        id,
+        title,
         readyInMinutes,
         image,
-        title,
+        aggregateLikes: popularity,
         vegan,
-        vegetarian, 
-        glutenFree
+        vegetarian,
+        glutenFree,
+        servings,
+        summary,
+        extendedIngredients,
+        _instructions,
+        analyzedInstructions: instructions || []
       };
 
       this.recipe = _recipe;
       console.log("Recipe data processed:", this.recipe);
     } catch (error) {
-      console.log("Error processing recipe data:", error);
+      console.error("Error processing recipe data:", error);
       this.$router.replace("/NotFound");
     }
   }
@@ -269,5 +304,36 @@ export default {
   .display-4 {
     font-size: calc(1.8rem + 1.5vw) !important;
   }
+}
+
+/* Recipe summary styling */
+.recipe-summary {
+  line-height: 1.6;
+  color: #555;
+}
+
+.recipe-summary a {
+  color: #1a73e8;
+  text-decoration: none;
+}
+
+.recipe-summary a:hover {
+  text-decoration: underline;
+}
+
+/* Ensure ingredients list is styled properly */
+.ingredients-list li {
+  margin-bottom: 8px;
+}
+
+/* Add animation for the instruction steps */
+.instruction-steps li {
+  opacity: 0;
+  animation: fadeInStep 0.5s ease forwards;
+}
+
+@keyframes fadeInStep {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 </style>

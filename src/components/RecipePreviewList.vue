@@ -37,14 +37,7 @@ export default {
     async updateRecipes() {
       try {
         const response = await this.axios.get(
-          "https://api.spoonacular.com/recipes/random",
-          {
-            params: {
-              limitLicense: true,
-              number: 3,
-              apiKey: 'b7b147413c244375812ccb826d79cdcc'
-            }
-          }
+          `${this.$root.store.server_domain}/recipes/random`
         );
 
         console.log("response: ", response);
