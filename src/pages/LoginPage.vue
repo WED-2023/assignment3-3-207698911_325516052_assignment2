@@ -21,8 +21,8 @@
               placeholder="Enter your username"
             />
           </div>
-          <div v-if="v$.username.$error" class="error-message">
-            <i class="fas fa-exclamation-circle"></i> Username is required.
+          <div v-if="hasUsernameError" class="error-message">
+            <i class="fas fa-exclamation-circle"></i> {{ getUsernameErrorMessage }}
           </div>
         </div>
         
@@ -40,8 +40,8 @@
               placeholder="Enter your password"
             />
           </div>
-          <div v-if="v$.password.$error" class="error-message">
-            <i class="fas fa-exclamation-circle"></i> Password is required (at least 6 characters).
+          <div v-if="hasPasswordError" class="error-message">
+            <i class="fas fa-exclamation-circle"></i> {{ getPasswordErrorMessage }}
           </div>
         </div>
         
@@ -50,9 +50,8 @@
         </div>
         
         <button type="submit" class="submit-button" :disabled="loading">
-          <i v-if="!loading" class="fas fa-sign-in-alt"></i>
-          <i v-else class="fas fa-spinner fa-spin"></i>
-          {{ loading ? 'Signing in...' : 'Login' }}
+          <i :class="buttonIcon"></i>
+          {{ buttonText }}
         </button>
         
         <div class="form-footer">
@@ -64,7 +63,7 @@
 </template>
 
 <script>
-import { reactive, ref } from 'vue';
+import { reactive, ref, computed } from 'vue';
 import { useVuelidate } from '@vuelidate/core';
 import { required, minLength } from '@vuelidate/validators';
 import axios from 'axios';
@@ -86,6 +85,36 @@ export default {
     };
 
     const v$ = useVuelidate(rules, state);
+    
+    // Computed properties for username validation
+    const hasUsernameError = computed(() => v$.value.username.$error);
+    const getUsernameErrorMessage = computed(() => {
+      if (v$.value.username.required.$invalid) {
+        return 'Username is required.';
+      }
+      return '';
+    });
+    
+    // Computed properties for password validation
+    const hasPasswordError = computed(() => v$.value.password.$error);
+    const getPasswordErrorMessage = computed(() => {
+      if (v$.value.password.required.$invalid) {
+        return 'Password is required.';
+      }
+      if (v$.value.password.minLength.$invalid) {
+        return 'Password must be at least 6 characters.';
+      }
+      return '';
+    });
+    
+    // Computed properties for button state
+    const buttonIcon = computed(() => {
+      return loading.value ? 'fas fa-spinner fa-spin' : 'fas fa-sign-in-alt';
+    });
+    
+    const buttonText = computed(() => {
+      return loading.value ? 'Signing in...' : 'Login';
+    });
 
     const login = async () => {
       if (await v$.value.$validate()) {
@@ -140,7 +169,19 @@ export default {
 
     expose({ login });
 
-    return { state, v$, login, loading, errorMessage };
+    return { 
+      state, 
+      v$, 
+      login, 
+      loading, 
+      errorMessage,
+      hasUsernameError,
+      getUsernameErrorMessage,
+      hasPasswordError,
+      getPasswordErrorMessage,
+      buttonIcon,
+      buttonText
+    };
   }
 };
 </script>

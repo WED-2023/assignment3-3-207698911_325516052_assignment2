@@ -14,16 +14,16 @@
       
       <!-- Recipe badges -->
       <div class="recipe-badges">
-        <span v-if="recipe.vegan" class="badge bg-success me-1">
+        <span v-if="showVeganBadge" class="badge bg-success me-1">
           <i class="fas fa-seedling me-1"></i>Vegan
         </span>
-        <span v-else-if="recipe.vegetarian" class="badge bg-info me-1">
+        <span v-else-if="showVegetarianBadge" class="badge bg-info me-1">
           <i class="fas fa-leaf me-1"></i>Vegetarian
         </span>
-        <span v-if="recipe.glutenFree" class="badge bg-warning text-dark me-1">
+        <span v-if="showGlutenFreeBadge" class="badge bg-warning text-dark me-1">
           <i class="fas fa-bread-slice me-1"></i>Gluten-Free
         </span>
-        <span v-if="recipe.dairyFree" class="badge bg-secondary me-1">
+        <span v-if="showDairyFreeBadge" class="badge bg-secondary me-1">
           <i class="fas fa-cheese me-1"></i>Dairy-Free
         </span>
       </div>
@@ -31,10 +31,10 @@
     <div class="card-body d-flex flex-column">
       <h5 class="card-title fw-bold">{{ recipe.title }}</h5>
       <div class="recipe-meta mb-3">
-        <span v-if="recipe.readyInMinutes" class="meta-item me-3">
-          <i class="far fa-clock text-primary me-1"></i> {{ recipe.readyInMinutes }} min
+        <span v-if="showCookingTime" class="meta-item me-3">
+          <i class="far fa-clock text-primary me-1"></i> {{ formattedCookingTime }}
         </span>
-        <span v-if="recipe.aggregateLikes" class="meta-item">
+        <span v-if="showLikes" class="meta-item">
           <i class="far fa-heart text-danger me-1"></i> {{ recipe.aggregateLikes }}
         </span>
       </div>
@@ -48,6 +48,8 @@
 </template>
 
 <script>
+import { computed } from 'vue';
+
 export default {
   name: "RecipePreview",
   props: {
@@ -56,12 +58,35 @@ export default {
       required: true
     }
   },
-  methods: {
-    handleImageError(e) {
-      console.error(`Failed to load image: ${this.recipe.image}`);
+  setup(props) {
+    // Computed properties for dietary badges
+    const showVeganBadge = computed(() => props.recipe.vegan);
+    const showVegetarianBadge = computed(() => props.recipe.vegetarian);
+    const showGlutenFreeBadge = computed(() => props.recipe.glutenFree);
+    const showDairyFreeBadge = computed(() => props.recipe.dairyFree);
+    
+    // Computed properties for recipe meta information
+    const showCookingTime = computed(() => props.recipe.readyInMinutes);
+    const formattedCookingTime = computed(() => `${props.recipe.readyInMinutes} min`);
+    const showLikes = computed(() => props.recipe.aggregateLikes);
+    
+    // Method to handle image loading errors
+    const handleImageError = (e) => {
+      console.error(`Failed to load image: ${props.recipe.image}`);
       // Fallback to a placeholder
       e.target.src = 'https://via.placeholder.com/300x200?text=Recipe+Image+Not+Available';
-    }
+    };
+    
+    return {
+      showVeganBadge,
+      showVegetarianBadge,
+      showGlutenFreeBadge,
+      showDairyFreeBadge,
+      showCookingTime,
+      formattedCookingTime,
+      showLikes,
+      handleImageError
+    };
   }
 }
 </script>

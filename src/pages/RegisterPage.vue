@@ -21,8 +21,8 @@
               placeholder="Choose a username"
             />
           </div>
-          <div v-if="v$.username.$error" class="error-message">
-            <i class="fas fa-exclamation-circle"></i> Username is required.
+          <div v-if="hasUsernameError" class="error-message">
+            <i class="fas fa-exclamation-circle"></i> {{ getUsernameErrorMessage }}
           </div>
         </div>
         
@@ -40,8 +40,8 @@
               placeholder="Create a password (6+ characters)"
             />
           </div>
-          <div v-if="v$.password.$error" class="error-message">
-            <i class="fas fa-exclamation-circle"></i> Password is required (at least 6 characters).
+          <div v-if="hasPasswordError" class="error-message">
+            <i class="fas fa-exclamation-circle"></i> {{ getPasswordErrorMessage }}
           </div>
         </div>
         
@@ -59,8 +59,8 @@
               placeholder="Confirm your password"
             />
           </div>
-          <div v-if="v$.confirmPassword.$error" class="error-message">
-            <i class="fas fa-exclamation-circle"></i> Passwords must match.
+          <div v-if="hasConfirmPasswordError" class="error-message">
+            <i class="fas fa-exclamation-circle"></i> {{ getConfirmPasswordErrorMessage }}
           </div>
         </div>
         
@@ -77,7 +77,7 @@
 </template>
 
 <script>
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
 import { useVuelidate } from '@vuelidate/core';
 import { required, minLength, sameAs } from '@vuelidate/validators';
 
@@ -97,6 +97,47 @@ export default {
     };
 
     const v$ = useVuelidate(rules, state);
+    
+    // Computed properties for username validation
+    const hasUsernameError = computed(() => v$.value.username.$error);
+    const getUsernameErrorMessage = computed(() => {
+      if (v$.value.username.required.$invalid) {
+        return 'Username is required.';
+      }
+      return '';
+    });
+    
+    // Computed properties for password validation
+    const hasPasswordError = computed(() => v$.value.password.$error);
+    const getPasswordErrorMessage = computed(() => {
+      if (v$.value.password.required.$invalid) {
+        return 'Password is required.';
+      }
+      if (v$.value.password.minLength.$invalid) {
+        return 'Password must be at least 6 characters.';
+      }
+      return '';
+    });
+    
+    // Computed properties for confirm password validation
+    const hasConfirmPasswordError = computed(() => v$.value.confirmPassword.$error);
+    const getConfirmPasswordErrorMessage = computed(() => {
+      if (v$.value.confirmPassword.required.$invalid) {
+        return 'Confirm password is required.';
+      }
+      if (v$.value.confirmPassword.sameAsPassword && v$.value.confirmPassword.sameAsPassword.$invalid) {
+        return 'Passwords must match.';
+      }
+      return '';
+    });
+    
+    // Method to check if passwords match in real-time
+    const checkPasswordsMatch = computed(() => {
+      if (state.password && state.confirmPassword) {
+        return state.password === state.confirmPassword;
+      }
+      return true; // Don't show mismatch if fields are empty
+    });
 
     const register = async () => {
       if (await v$.value.$validate()) {
@@ -115,7 +156,18 @@ export default {
 
     expose({ register });
 
-    return { state, v$, register };
+    return { 
+      state, 
+      v$, 
+      register,
+      hasUsernameError,
+      getUsernameErrorMessage,
+      hasPasswordError,
+      getPasswordErrorMessage,
+      hasConfirmPasswordError,
+      getConfirmPasswordErrorMessage,
+      checkPasswordsMatch
+    };
   }
 };
 </script>

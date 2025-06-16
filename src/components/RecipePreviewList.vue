@@ -5,13 +5,13 @@
       <slot></slot>
     </h3>
     
-    <div v-if="recipes.length > 0" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <div v-if="hasRecipes" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
       <div class="col" v-for="r in recipes" :key="r.id">
         <RecipePreview class="recipePreview" :recipe="r" />
       </div>
     </div>
     
-    <div v-else-if="loading" class="row justify-content-center mb-5">
+    <div v-else-if="isLoading" class="row justify-content-center mb-5">
       <div class="col-md-8 text-center py-5">
         <div class="spinner-border text-primary mb-3" role="status">
           <span class="visually-hidden">Loading...</span>
@@ -32,6 +32,8 @@
 
 <script>
 import RecipePreview from "./RecipePreview.vue";
+import { ref, computed, onMounted } from 'vue';
+
 export default {
   name: "RecipePreviewList",
   components: {
@@ -48,55 +50,45 @@ export default {
       default: false
     }
   },
-  data() {
-    return {
-      recipes: [],
-      loading: false,
-      error: null
-    };
-  },
-  mounted() {
-    if (!this.disabled) {
-      this.updateRecipes();
-    }
-  },
-  methods: {
-    async updateRecipes() {
-      this.loading = true;
-      this.error = null;
+  setup(props) {
+    const recipes = ref([]);
+    const loading = ref(false);
+    const error = ref(null);
+    
+    // Computed properties
+    const hasRecipes = computed(() => recipes.value.length > 0);
+    const isLoading = computed(() => loading.value);
+    const hasError = computed(() => error.value !== null);
+    
+    // Methods
+    const updateRecipes = async () => {
+      loading.value = true;
+      error.value = null;
       
       try {
-        const apiUrl = `${this.$root.store.server_domain}/recipes/random`;
+        const apiUrl = `${window.store.server_domain}/recipes/random`;
         console.log("Fetching recipes from:", apiUrl);
         
-        // Check if axios is available
-        if (!this.axios) {
-          console.error("Axios is not available on the component");
-          // Try to use global axios
-          if (window.axios) {
-            console.log("Using window.axios instead");
-            const response = await window.axios.get(apiUrl);
-            this.processApiResponse(response);
-          } else {
-            console.error("No axios instance available");
-          }
-          return;
+        // Try to use global axios
+        if (window.axios) {
+          console.log("Using window.axios");
+          const response = await window.axios.get(apiUrl);
+          processApiResponse(response);
+        } else {
+          console.error("No axios instance available");
         }
-        
-        const response = await this.axios.get(apiUrl);
-        this.processApiResponse(response);
       } catch (error) {
         console.error("Error fetching recipes:", error);
-        this.error = error.message || "Failed to fetch recipes";
+        error.value = error.message || "Failed to fetch recipes";
         
         // For testing/debugging - add some mock recipes if API fails
-        this.addMockRecipes();
+        addMockRecipes();
       } finally {
-        this.loading = false;
+        loading.value = false;
       }
-    },
+    };
     
-    processApiResponse(response) {
+    const processApiResponse = (response) => {
       console.log("API Response:", response);
       
       // Check for valid response structure
@@ -120,7 +112,7 @@ export default {
       } else {
         console.error("Could not find recipes array in response:", response.data);
         // For testing/debugging - add some mock data if response structure is unexpected
-        this.addMockRecipes();
+        addMockRecipes();
         return;
       }
       
@@ -129,7 +121,7 @@ export default {
         return;
       }
       
-      const recipes = recipesArray.map((r) => {
+      const processedRecipes = recipesArray.map((r) => {
         const recipe = {
           id: r.id || Math.floor(Math.random() * 10000),
           title: r.title || "Untitled Recipe",
@@ -145,15 +137,15 @@ export default {
         return recipe;
       });
       
-      console.log("All processed recipes:", recipes);
+      console.log("All processed recipes:", processedRecipes);
       
-      this.recipes = recipes;
-      console.log("Final recipes array:", this.recipes);
-    },
+      recipes.value = processedRecipes;
+      console.log("Final recipes array:", recipes.value);
+    };
     
-    addMockRecipes() {
+    const addMockRecipes = () => {
       console.log("Adding mock recipes for testing");
-      this.recipes = [
+      recipes.value = [
         {
           id: 1,
           title: "Spaghetti Carbonara",
@@ -188,7 +180,21 @@ export default {
           dairyFree: true
         }
       ];
-    }
+    };
+    
+    onMounted(() => {
+      if (!props.disabled) {
+        updateRecipes();
+      }
+    });
+    
+    return {
+      recipes,
+      hasRecipes,
+      isLoading,
+      hasError,
+      updateRecipes
+    };
   }
 };
 </script>
