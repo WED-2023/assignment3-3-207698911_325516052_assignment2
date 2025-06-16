@@ -7,7 +7,7 @@
     
     <div class="section">
       <h2 class="section-title">Random Recipes</h2>
-      <RecipePreviewList title="" class="recipe-list center" />
+      <RecipePreviewList title="" class="recipe-list" />
     </div>
     
     <div v-if="!store.username" class="login-prompt">
@@ -27,8 +27,7 @@
         title=""
         :class="{
           'recipe-list': true,
-          'blur-content': !store.username,
-          'center': true
+          'blur-content': !store.username
         }"
         disabled
       />
