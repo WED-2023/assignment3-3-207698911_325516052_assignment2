@@ -23,6 +23,11 @@
                 <i class="fas fa-search me-1"></i> Search
               </router-link>
             </li>
+            <li class="nav-item" v-if="store.username">
+              <router-link :to="{ name: 'dashboard' }" class="nav-link">
+                <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+              </router-link>
+            </li>
           </ul>
           
           <div v-if="!store.username" class="d-flex">

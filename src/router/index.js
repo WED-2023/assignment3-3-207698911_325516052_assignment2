@@ -28,6 +28,11 @@ const routes = [
     component: () => import("../pages/RecipeViewPage.vue"),
   },
   {
+    path: "/dashboard",
+    name: "dashboard",
+    component: () => import("../pages/DashboardPage.vue"),
+  },
+  {
     path: "/:catchAll(.*)",
     name: "notFound",
     component: NotFound,

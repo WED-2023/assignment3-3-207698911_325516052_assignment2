@@ -113,7 +113,7 @@ export default {
           
           if (response && response.data && response.data.success) {
             window.store.login(state.username);
-            window.router.push('/main');
+            window.router.push('/dashboard');
           } else {
             errorMessage.value = "Login failed with unexpected response";
             console.error("Unexpected response:", response);
