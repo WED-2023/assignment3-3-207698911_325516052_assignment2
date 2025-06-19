@@ -27,6 +27,18 @@
           <i class="fas fa-cheese me-1"></i>Dairy-Free
         </span>
       </div>
+      
+      <!-- Favorite button -->
+      <button 
+        v-if="isAuthenticated"
+        @click.stop="toggleFavorite" 
+        class="favorite-btn position-absolute top-0 end-0 m-3"
+        :class="{ 'is-favorite': isFavorite }"
+        :disabled="isToggling"
+        :title="isFavorite ? 'Remove from favorites' : 'Add to favorites'"
+      >
+        <i :class="favoriteIconClass"></i>
+      </button>
     </div>
     <div class="card-body d-flex flex-column">
       <h5 class="card-title fw-bold">{{ recipe.title }}</h5>
@@ -48,7 +60,9 @@
 </template>
 
 <script>
-import { computed } from 'vue';
+import { computed, ref, onMounted } from 'vue';
+import favoritesService from '../services/favoritesService';
+import store from '../store';
 
 export default {
   name: "RecipePreview",
@@ -59,6 +73,21 @@ export default {
     }
   },
   setup(props) {
+    // Reactive state
+    const isFavorite = ref(false);
+    const isToggling = ref(false);
+    
+    // Check if user is authenticated
+    const isAuthenticated = computed(() => !!store.username);
+    
+    // Computed properties for favorite icon
+    const favoriteIconClass = computed(() => {
+      if (isToggling.value) {
+        return "fas fa-spinner fa-spin";
+      }
+      return isFavorite.value ? "fas fa-heart" : "far fa-heart";
+    });
+    
     // Computed properties for dietary badges
     const showVeganBadge = computed(() => props.recipe.vegan);
     const showVegetarianBadge = computed(() => props.recipe.vegetarian);
@@ -70,6 +99,41 @@ export default {
     const formattedCookingTime = computed(() => `${props.recipe.readyInMinutes} min`);
     const showLikes = computed(() => props.recipe.aggregateLikes);
     
+    // Check if recipe is in favorites
+    const checkIfFavorite = async () => {
+      if (!isAuthenticated.value) return;
+      
+      try {
+        const result = await favoritesService.isInFavorites(props.recipe.id);
+        isFavorite.value = result;
+      } catch (error) {
+        console.error("Error checking favorite status:", error);
+      }
+    };
+    
+    // Toggle favorite status
+    const toggleFavorite = async (event) => {
+      event.preventDefault(); // Prevent navigation when clicking the favorite button
+      
+      if (!isAuthenticated.value || isToggling.value) return;
+      
+      isToggling.value = true;
+      
+      try {
+        if (isFavorite.value) {
+          await favoritesService.removeFromFavorites(props.recipe.id);
+          isFavorite.value = false;
+        } else {
+          await favoritesService.addToFavorites(props.recipe.id);
+          isFavorite.value = true;
+        }
+      } catch (error) {
+        console.error("Error toggling favorite status:", error);
+      } finally {
+        isToggling.value = false;
+      }
+    };
+    
     // Method to handle image loading errors
     const handleImageError = (e) => {
       console.error(`Failed to load image: ${props.recipe.image}`);
@@ -77,7 +141,14 @@ export default {
       e.target.src = 'https://via.placeholder.com/300x200?text=Recipe+Image+Not+Available';
     };
     
+    onMounted(checkIfFavorite);
+    
     return {
+      isAuthenticated,
+      isFavorite,
+      isToggling,
+      favoriteIconClass,
+      toggleFavorite,
       showVeganBadge,
       showVegetarianBadge,
       showGlutenFreeBadge,
@@ -159,5 +230,43 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   height: 2.5rem;
+}
+
+/* Favorite button styles */
+.favorite-btn {
+  background-color: white;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.favorite-btn:hover {
+  transform: scale(1.1);
+}
+
+.favorite-btn i {
+  font-size: 1.2rem;
+  color: #dc3545;
+  transition: all 0.3s ease;
+}
+
+.favorite-btn.is-favorite i {
+  color: #dc3545;
+}
+
+.favorite-btn:not(.is-favorite) i {
+  color: #6c757d;
+}
+
+.favorite-btn:hover i {
+  color: #dc3545;
 }
 </style>

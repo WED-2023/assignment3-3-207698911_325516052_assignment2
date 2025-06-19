@@ -141,9 +141,11 @@
 
 <script>
 import { getCurrentInstance } from 'vue';
+import favoritesService from '../services/favoritesService';
 
 export default {
-  name: 'DashboardPage',  data() {
+  name: 'DashboardPage',
+  data() {
     return {
       viewedRecipes: [],
       favoriteRecipes: [],
@@ -155,7 +157,8 @@ export default {
     const store = internalInstance.appContext.config.globalProperties.store;
     
     return { store };
-  },  mounted() {
+  },
+  mounted() {
     // Check if user is logged in
     if (!this.store.username) {
       this.$router.push({ name: 'login' });
@@ -164,9 +167,16 @@ export default {
     
     this.loadUserData();
   },
-  methods: {    loadUserData() {
-      // In a real app, you would fetch this from your backend
-      // For now, let's use some mock data
+  methods: {
+    async loadUserData() {
+      // Fetch favorite recipes using our service
+      try {
+        const favorites = await favoritesService.getFavorites();
+        this.favoriteRecipes = favorites || [];
+      } catch (error) {
+        console.error("Error fetching favorites:", error);
+        this.favoriteRecipes = [];
+      }
       
       // Mock viewed recipes
       this.viewedRecipes = [

@@ -33,6 +33,11 @@ const routes = [
     component: () => import("../pages/DashboardPage.vue"),
   },
   {
+    path: "/favorites",
+    name: "favorites",
+    component: () => import("../pages/FavoritesPage.vue"),
+  },
+  {
     path: "/:catchAll(.*)",
     name: "notFound",
     component: NotFound,
