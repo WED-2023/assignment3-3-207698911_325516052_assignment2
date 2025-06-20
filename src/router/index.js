@@ -29,8 +29,12 @@ const routes = [
   },
   {
     path: "/dashboard",
-    name: "dashboard",
-    component: () => import("../pages/DashboardPage.vue"),
+    redirect: "/personal-area",
+  },
+  {
+    path: "/personal-area",
+    name: "personalArea",
+    component: () => import("../pages/PersonalAreaPage.vue"),
   },
   {
     path: "/favorites",

@@ -34,8 +34,8 @@
               </router-link>
             </li>
             <li class="nav-item" v-if="store.username">
-              <router-link :to="{ name: 'dashboard' }" class="nav-link">
-                <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+              <router-link :to="{ name: 'personalArea' }" class="nav-link">
+                <i class="fas fa-user-cog me-1"></i> Personal Area
               </router-link>
             </li>
           </ul>

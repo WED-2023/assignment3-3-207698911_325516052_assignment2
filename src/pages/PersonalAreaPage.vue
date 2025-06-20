@@ -1,41 +1,8 @@
-<template>
-  <div class="container py-5">
+<template>  <div class="container py-5">
     <div class="row mb-5">
       <div class="col-12 text-center">
         <h1 class="display-4 fw-bold text-primary">Welcome Back, {{ store.username }}!</h1>
-        <p class="lead text-muted">Your personalized recipe dashboard</p>
-      </div>
-    </div>
-    
-    <!-- User Stats Card -->
-    <div class="row mb-5">
-      <div class="col-md-10 mx-auto">
-        <div class="card border-0 shadow-sm">
-          <div class="card-body p-4">
-            <div class="row g-4">              <div class="col-md-4">
-                <div class="user-stat text-center">
-                  <i class="fas fa-eye text-primary stat-icon mb-3"></i>
-                  <h3 class="h2 fw-bold">{{ viewedRecipes.length }}</h3>
-                  <p class="text-muted">Recipes Viewed</p>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="user-stat text-center">
-                  <i class="fas fa-heart text-danger stat-icon mb-3"></i>
-                  <h3 class="h2 fw-bold">{{ favoriteRecipes.length }}</h3>
-                  <p class="text-muted">Favorite Recipes</p>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="user-stat text-center">
-                  <i class="fas fa-list text-success stat-icon mb-3"></i>
-                  <h3 class="h2 fw-bold">{{ myCollections.length }}</h3>
-                  <p class="text-muted">My Collections</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <p class="lead text-muted">Your personal recipe area</p>
       </div>
     </div>
     
@@ -91,12 +58,12 @@
                 <p class="text-muted small">Meet our development team</p>
               </div>
             </router-link>
-          </div>
-        </div>
-      </div>    </div>
+          </div>        </div>
+      </div>
+    </div>
     
     <!-- Recently Viewed Recipes -->
-    <div class="row">
+    <div class="row mb-5">
       <div class="col-12 text-center mb-4">
         <h2 class="h3 fw-bold">Recently Viewed Recipes</h2>
         <hr class="divider mx-auto">
@@ -162,7 +129,7 @@ import { getCurrentInstance } from 'vue';
 import favoritesService from '../services/favoritesService';
 
 export default {
-  name: 'DashboardPage',
+  name: 'PersonalAreaPage',
   data() {
     return {
       viewedRecipes: [],
@@ -230,22 +197,11 @@ export default {
         }
       ];
       
-      // Mock favorite recipes
-      this.favoriteRecipes = [
-        {
-          id: 2,
-          title: "Spinach and Mushroom Lasagna"
-        },
-        {
-          id: 4,
-          title: "Chocolate Chip Cookies"
-        }
-      ];
-      
       // Mock collections
       this.myCollections = [
         { id: 1, name: "Weeknight Dinners" },
-        { id: 2, name: "Healthy Breakfast" }      ];
+        { id: 2, name: "Healthy Breakfast" }
+      ];
     }
   }
 };
@@ -260,18 +216,9 @@ export default {
   border-radius: 2px;
 }
 
-.stat-icon, .action-icon {
+.action-icon {
   font-size: 2.5rem;
   display: block;
-}
-
-.user-stat {
-  padding: 15px;
-  transition: transform 0.3s ease;
-}
-
-.user-stat:hover {
-  transform: translateY(-5px);
 }
 
 .quick-action-card {
@@ -281,7 +228,8 @@ export default {
 }
 
 .quick-action-card:hover {
-  transform: translateY(-5px);  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
 }
 
 .recipe-image-wrapper {
