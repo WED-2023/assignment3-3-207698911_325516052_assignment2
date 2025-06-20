@@ -4,6 +4,7 @@ import routes from './router/index';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
 import { createRouter, createWebHistory } from 'vue-router';
+// import * as bootstrap from 'bootstrap';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.js';
@@ -47,6 +48,9 @@ const router = createRouter({
 
 // Make router available globally
 window.router = router;
+
+// Create a simple toast notification function
+// Function removed to avoid duplication with app.config.globalProperties.toast
 
 const app = createApp(App);
 
