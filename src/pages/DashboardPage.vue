@@ -74,6 +74,15 @@
               </div>
             </router-link>
           </div>
+          <div class="col-md-4 mt-4">
+            <router-link to="/family-recipes" class="quick-action-card card border-0 shadow-sm h-100">
+              <div class="card-body text-center p-4">
+                <i class="fas fa-book-open action-icon text-warning mb-3"></i>
+                <h3 class="h5 fw-bold">Family Recipes</h3>
+                <p class="text-muted small">Explore treasured family recipes</p>
+              </div>
+            </router-link>
+          </div>
         </div>
       </div>    </div>
     
