@@ -88,13 +88,15 @@
             <p class="mb-4">Check out our previous assignments from the Web Environments Development course:</p>
             
             <div class="row g-4">
-              <div class="col-md-4">
-                <div class="card h-100 previous-project">
+              <div class="col-md-4">                <div class="card h-100 previous-project">
                   <div class="card-body">
-                    <h3 class="h5 fw-bold">Assignment 1</h3>
-                    <p class="text-muted small mb-3">HTML, CSS & Responsive Design</p>
-                    <p class="mb-3">Static website showcasing fundamental web development skills and responsive design principles.</p>
-                    <a href="#" class="btn btn-outline-primary btn-sm">View Project</a>
+                    <h3 class="h5 fw-bold">Assignment 1: Personal Websites</h3>
+                    <p class="text-muted small mb-3">HTML, CSS & Basic Web Development</p>
+                    <p class="mb-3">Our first web projects - simple HTML/CSS website with multimedia and interactive features</p>
+                    <div class="d-flex gap-2">
+                      <a href="https://wed-2023.github.io/207698911/" target="_blank" class="btn btn-outline-primary btn-sm">Guy's Site</a>
+                      <a href="https://wed-2023.github.io/325516052/" target="_blank" class="btn btn-outline-primary btn-sm">Dan's Site</a>
+                    </div>
                   </div>
                 </div>
               </div>
