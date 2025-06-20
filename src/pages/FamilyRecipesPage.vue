@@ -1,7 +1,6 @@
-<template>
-  <div class="container family-recipes-page">
-    <h1 class="title">Family Recipes</h1>
-    <p class="subtitle">Treasured recipes passed down through generations</p>
+<template>  <div class="container family-recipes-page">
+    <h1 class="display-4 fw-bold text-primary text-center">Family Recipes</h1>
+    <p class="lead text-muted text-center mb-5">Treasured recipes passed down through generations</p>
 
     <div class="recipes-container">
       <!-- Recipe 1 -->
