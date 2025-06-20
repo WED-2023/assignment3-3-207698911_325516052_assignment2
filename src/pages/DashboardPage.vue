@@ -83,6 +83,15 @@
               </div>
             </router-link>
           </div>
+          <div class="col-md-4 mt-4">
+            <router-link to="/about" class="quick-action-card card border-0 shadow-sm h-100">
+              <div class="card-body text-center p-4">
+                <i class="fas fa-info-circle action-icon text-info mb-3"></i>
+                <h3 class="h5 fw-bold">About Us</h3>
+                <p class="text-muted small">Meet our development team</p>
+              </div>
+            </router-link>
+          </div>
         </div>
       </div>    </div>
     

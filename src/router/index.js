@@ -43,6 +43,11 @@ const routes = [
     component: () => import("../pages/FamilyRecipesPage.vue"),
   },
   {
+    path: "/about",
+    name: "about",
+    component: () => import("../pages/AboutPage.vue"),
+  },
+  {
     path: "/:catchAll(.*)",
     name: "notFound",
     component: NotFound,

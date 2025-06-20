@@ -28,6 +28,11 @@
                 <i class="fas fa-book-open me-1"></i> Family Recipes
               </router-link>
             </li>
+            <li class="nav-item">
+              <router-link :to="{ name: 'about' }" class="nav-link">
+                <i class="fas fa-info-circle me-1"></i> About
+              </router-link>
+            </li>
             <li class="nav-item" v-if="store.username">
               <router-link :to="{ name: 'dashboard' }" class="nav-link">
                 <i class="fas fa-tachometer-alt me-1"></i> Dashboard
