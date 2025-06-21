@@ -9,7 +9,7 @@
     
     <!-- Search Form -->
     <div class="row justify-content-center mb-5">
-      <div class="col-md-8">
+      <div class="col-md-10">
         <div class="card search-card shadow-sm border-0">
           <div class="card-body p-4">
             <div class="input-group mb-3">
@@ -19,7 +19,7 @@
               <input 
                 type="text" 
                 v-model="searchQuery" 
-                placeholder="Find a recipe..." 
+                placeholder="Find a recipe or search by filters below..." 
                 class="form-control border-start-0"
                 @keyup.enter="searchRecipes"
               />
@@ -27,10 +27,77 @@
                 Search
               </button>
             </div>
-            <div class="text-center">
+
+            <!-- Advanced Search Options -->
+            <div class="row mt-3">
+              <div class="col-12 mb-2">
+                <div class="d-flex align-items-center mb-2">
+                  <h6 class="mb-0 me-2">Filter Options</h6>
+                  <small class="text-muted">(You can search using these filters without entering text above)</small>
+                </div>
+              </div>
+              <div class="col-md-3 mb-2">
+                <label class="form-label">Cuisine</label>
+                <select v-model="cuisine" class="form-select">
+                  <option value="">Any Cuisine</option>
+                  <option v-for="option in cuisineOptions" :key="option" :value="option">
+                    {{ option }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-3 mb-2">
+                <label class="form-label">Diet</label>
+                <select v-model="diet" class="form-select">
+                  <option value="">Any Diet</option>
+                  <option v-for="option in dietOptions" :key="option" :value="option">
+                    {{ option }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-3 mb-2">
+                <label class="form-label">Intolerance</label>
+                <select v-model="intolerance" class="form-select">
+                  <option value="">No Intolerance</option>
+                  <option v-for="option in intoleranceOptions" :key="option" :value="option">
+                    {{ option }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-3 mb-2">
+                <label class="form-label">Results Count</label>
+                <select v-model="resultsCount" class="form-select">
+                  <option value="5">5 Results</option>
+                  <option value="10">10 Results</option>
+                  <option value="15">15 Results</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-3">
               <button @click="fetchRandomRecipe" class="btn btn-outline-primary">
                 <i class="fas fa-random me-2"></i> Surprise Me
               </button>
+              
+              <div v-if="recipes && recipes.length">
+                <label class="me-2">Sort by:</label>
+                <div class="btn-group">
+                  <button 
+                    @click="sortBy('readyInMinutes')" 
+                    class="btn btn-sm" 
+                    :class="sortField === 'readyInMinutes' ? 'btn-primary' : 'btn-outline-primary'">
+                    <i class="far fa-clock me-1"></i> Time
+                  </button>
+                  <button 
+                    @click="sortBy('popularity')" 
+                    class="btn btn-sm" 
+                    :class="sortField === 'popularity' ? 'btn-primary' : 'btn-outline-primary'">
+                    <i class="far fa-heart me-1"></i> Popularity
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -58,18 +125,18 @@
     </div>
     
     <!-- Search Results -->
-    <div v-if="recipes && recipes.length" class="mb-5">
+    <div v-if="sortedRecipes && sortedRecipes.length" class="mb-5">
       <div class="row mb-4">
         <div class="col-12 text-center">
           <h2 class="h3 fw-bold">
-            <span class="text-primary">{{ recipes.length }}</span> recipes found
+            <span class="text-primary">{{ sortedRecipes.length }}</span> recipes found
           </h2>
           <hr class="divider mx-auto">
         </div>
       </div>
       
       <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        <div v-for="recipe in recipes" :key="recipe.id" class="col">
+        <div v-for="recipe in sortedRecipes" :key="recipe.id" class="col">
           <div class="card h-100 recipe-card border-0 shadow-sm">
             <div class="position-relative overflow-hidden recipe-image-wrapper">
               <img 
@@ -95,8 +162,8 @@
                 <span v-if="recipe.readyInMinutes" class="meta-item me-3">
                   <i class="far fa-clock text-primary me-1"></i> {{ recipe.readyInMinutes }} min
                 </span>
-                <span v-if="recipe.popularity" class="meta-item">
-                  <i class="far fa-heart text-danger me-1"></i> {{ recipe.popularity }}
+                <span v-if="recipe.popularity || recipe.aggregateLikes" class="meta-item">
+                  <i class="far fa-heart text-danger me-1"></i> {{ recipe.popularity || recipe.aggregateLikes }}
                 </span>
               </div>
               <router-link :to="{ name: 'recipe', params: { recipeId: recipe.id } }" class="btn btn-primary mt-auto">
@@ -143,17 +210,58 @@ export default {
     return {
       searchQuery: '',
       recipes: null,
-      data: null,
       loading: false,
       error: null,
       rawResponse: null,
-      showDebug: false
+      showDebug: false,
+      // Search filters
+      cuisine: '',
+      diet: '',
+      intolerance: '',
+      resultsCount: '5',
+      // Sorting
+      sortField: 'popularity',
+      sortDirection: 'desc',
+      // Options for filters
+      cuisineOptions: [
+        'African', 'American', 'British', 'Cajun', 'Caribbean', 'Chinese', 'Eastern European',
+        'European', 'French', 'German', 'Greek', 'Indian', 'Irish', 'Italian', 'Japanese',
+        'Jewish', 'Korean', 'Latin American', 'Mediterranean', 'Mexican', 'Middle Eastern',
+        'Nordic', 'Southern', 'Spanish', 'Thai', 'Vietnamese'
+      ],
+      dietOptions: [
+        'Gluten Free', 'Ketogenic', 'Vegetarian', 'Lacto-Vegetarian', 'Ovo-Vegetarian',
+        'Vegan', 'Pescetarian', 'Paleo', 'Primal', 'Low FODMAP', 'Whole30'
+      ],
+      intoleranceOptions: [
+        'Dairy', 'Egg', 'Gluten', 'Grain', 'Peanut', 'Seafood', 'Sesame', 'Shellfish',
+        'Soy', 'Sulfite', 'Tree Nut', 'Wheat'
+      ]
     };
+  },
+  computed: {
+    sortedRecipes() {
+      if (!this.recipes) return [];
+      
+      return [...this.recipes].sort((a, b) => {
+        const fieldA = a[this.sortField] || 0;
+        const fieldB = b[this.sortField] || 0;
+        
+        if (this.sortDirection === 'asc') {
+          return fieldA - fieldB;
+        } else {
+          return fieldB - fieldA;
+        }
+      });
+    }
   },
   methods: {
     async searchRecipes() {
-      if (!this.searchQuery.trim()) {
-        this.error = "Please enter a search term";
+      // Allow searching by filters only if at least one filter is selected
+      const hasFilters = this.cuisine || this.diet || this.intolerance;
+      
+      if (!this.searchQuery.trim() && !hasFilters) {
+        this.error = "Please enter a search term or select at least one filter";
         return;
       }
       
@@ -162,13 +270,47 @@ export default {
       this.rawResponse = null;
       
       try {
-        const response = await axios.get(`${this.$root.store.server_domain}/recipes/search`, {
-          params: { query: this.searchQuery }
-        });
+        // Prepare search parameters
+        const params = { 
+          number: this.resultsCount
+        };
+        
+        // Add search query if provided
+        if (this.searchQuery.trim()) {
+          params.query = this.searchQuery.trim();
+        } else {
+          // If no query text, set a default broad query
+          params.query = "all";
+        }
+        
+        // Add filters if selected
+        if (this.cuisine) params.cuisine = this.cuisine;
+        if (this.diet) params.diet = this.diet;
+        if (this.intolerance) params.intolerances = this.intolerance;
+        
+        // Save the current search in localStorage if user is logged in
+        if (this.$root.store.username) {
+          localStorage.setItem('lastSearch', JSON.stringify({
+            query: this.searchQuery.trim(),
+            cuisine: this.cuisine,
+            diet: this.diet,
+            intolerance: this.intolerance,
+            resultsCount: this.resultsCount,
+            searchByFiltersOnly: !this.searchQuery.trim() && hasFilters
+          }));
+        }
+        
+        console.log("Searching with params:", params);
+        const response = await axios.get(`${this.$root.store.server_domain}/recipes/search`, { params });
+        
         // Store the raw response for debugging
         this.rawResponse = JSON.stringify(response.data, null, 2);
         
         this.recipes = response.data;
+        
+        // Default sort by popularity
+        this.sortField = 'popularity';
+        this.sortDirection = 'desc';
       } catch (err) {
         this.error = `Error searching recipes: ${err.message}`;
         console.error(err);
@@ -219,6 +361,21 @@ export default {
       }
     },
     
+    sortBy(field) {
+      // If already sorting by this field, toggle direction
+      if (this.sortField === field) {
+        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortField = field;
+        this.sortDirection = 'asc';
+        // For readyInMinutes, sort ascending by default (faster is better)
+        // For popularity, sort descending by default (more popular is better)
+        if (field === 'popularity') {
+          this.sortDirection = 'desc';
+        }
+      }
+    },
+    
     toggleDebug() {
       this.showDebug = !this.showDebug;
     },
@@ -228,9 +385,37 @@ export default {
     },
     
     truncateText(text, maxLength) {
+      if (!text) return '';
       if (text.length <= maxLength) return text;
       return text.slice(0, maxLength) + '...';
+    },
+    
+    loadLastSearch() {
+      if (this.$root.store.username) {
+        const lastSearch = localStorage.getItem('lastSearch');
+        if (lastSearch) {
+          try {
+            const searchData = JSON.parse(lastSearch);
+            this.searchQuery = searchData.query || '';
+            this.cuisine = searchData.cuisine || '';
+            this.diet = searchData.diet || '';
+            this.intolerance = searchData.intolerance || '';
+            this.resultsCount = searchData.resultsCount || '5';
+            
+            // If we have a valid query, execute the search
+            if (this.searchQuery) {
+              this.searchRecipes();
+            }
+          } catch (error) {
+            console.error("Error loading last search:", error);
+          }
+        }
+      }
     }
+  },
+  mounted() {
+    // Load the last search when the component is mounted
+    this.loadLastSearch();
   }
 }
 </script>
