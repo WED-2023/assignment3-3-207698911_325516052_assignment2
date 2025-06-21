@@ -230,9 +230,53 @@ export default {
 
       this.recipe = _recipe;
       console.log("Recipe data processed:", this.recipe);
+      
+      // Save viewed recipe to localStorage
+      this.saveViewedRecipe(_recipe);
     } catch (error) {
       console.error("Error processing recipe data:", error);
       this.$router.replace("/NotFound");
+    }
+  },
+  methods: {
+    saveViewedRecipe(recipe) {
+      try {
+        // Get existing viewed recipes from localStorage
+        const viewedRecipesJSON = localStorage.getItem('viewedRecipes') || '[]';
+        let viewedRecipes = JSON.parse(viewedRecipesJSON);
+        
+        // Ensure it's an array
+        if (!Array.isArray(viewedRecipes)) {
+          viewedRecipes = [];
+        }
+        
+        // Create a simplified version of the recipe to save
+        const recipeToSave = {
+          id: recipe.id,
+          title: recipe.title,
+          readyInMinutes: recipe.readyInMinutes,
+          image: recipe.image,
+          aggregateLikes: recipe.aggregateLikes,
+          vegan: recipe.vegan,
+          vegetarian: recipe.vegetarian,
+          glutenFree: recipe.glutenFree
+        };
+        
+        // Remove this recipe if it already exists in the list
+        viewedRecipes = viewedRecipes.filter(r => r.id !== recipe.id);
+        
+        // Add the new recipe to the beginning of the array
+        viewedRecipes.unshift(recipeToSave);
+        
+        // Keep only the last 10 viewed recipes
+        viewedRecipes = viewedRecipes.slice(0, 10);
+        
+        // Save back to localStorage
+        localStorage.setItem('viewedRecipes', JSON.stringify(viewedRecipes));
+        console.log('Recipe saved to viewed recipes:', recipe.title);
+      } catch (error) {
+        console.error('Error saving viewed recipe to localStorage:', error);
+      }
     }
   }
 };

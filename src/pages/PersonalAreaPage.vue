@@ -328,10 +328,18 @@ export default {
         console.log("Processed user recipes:", this.myRecipes);
       } catch (error) {
         console.error("Error fetching user recipes:", error);
-        this.myRecipes = [];
-      }
+        this.myRecipes = [];      }
       
-      this.viewedRecipes = [];
+      // Load viewed recipes from localStorage
+      try {
+        const viewedRecipesJSON = localStorage.getItem('viewedRecipes') || '[]';
+        const viewedRecipes = JSON.parse(viewedRecipesJSON);
+        this.viewedRecipes = Array.isArray(viewedRecipes) ? viewedRecipes : [];
+        console.log("Loaded viewed recipes from localStorage:", this.viewedRecipes);
+      } catch (error) {
+        console.error("Error loading viewed recipes from localStorage:", error);
+        this.viewedRecipes = [];
+      }
     },
     
     openRecipeCreationModal() {
