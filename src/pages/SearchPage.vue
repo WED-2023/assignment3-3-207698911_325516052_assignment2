@@ -1,5 +1,25 @@
 <template>
-  <div class="container py-5">
+  <!-- Locked page for non-signed-in users -->
+  <div v-if="!$root.store.username" class="container py-5 locked-container">
+    <div class="login-prompt">
+      <div class="login-prompt-content">
+        <i class="fas fa-lock login-icon"></i>
+        <h2>Recipe Search</h2>
+        <h3>Search Features Locked</h3>
+        <p>Sign in to search for recipes, apply filters, and discover new dishes</p>
+        <router-link :to="{ name: 'login' }" class="login-button">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </router-link>
+        <div class="or-divider">or</div>
+        <router-link :to="{ name: 'register' }" class="register-button">
+          <i class="fas fa-user-plus"></i> Register
+        </router-link>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Search Page for logged in users -->
+  <div v-else class="container py-5">
     <div class="row mb-5">
       <div class="col-12 text-center">
         <h1 class="display-4 fw-bold text-primary">Recipe Explorer</h1>
@@ -432,6 +452,107 @@ export default {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Locked container */
+.locked-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+}
+
+/* Login Prompt */
+.login-prompt {
+  background-color: #f0f5ff;
+  border-radius: 16px;
+  padding: 40px;
+  margin: 40px 0;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.login-prompt-content {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.login-icon {
+  font-size: 3.5rem;
+  color: #1a73e8;
+  margin-bottom: 20px;
+}
+
+.login-prompt h2 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #1a73e8;
+  margin-bottom: 15px;
+}
+
+.login-prompt h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.login-prompt p {
+  color: #666;
+  margin-bottom: 25px;
+  font-size: 1.1rem;
+}
+
+.login-button, .register-button {
+  display: inline-block;
+  padding: 12px 24px;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s;
+  width: 100%;
+  max-width: 250px;
+}
+
+.login-button {
+  background-color: #1a73e8;
+  color: white;
+}
+
+.login-button:hover {
+  background-color: #0d62c9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.register-button {
+  background-color: #34a853;
+  color: white;
+}
+
+.register-button:hover {
+  background-color: #2d8e47;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.or-divider {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+  color: #666;
+  font-weight: 500;
+}
+
+.or-divider::before,
+.or-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid #ddd;
+  margin: 0 15px;
 }
 
 .recipe-card {

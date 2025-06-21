@@ -1,49 +1,43 @@
 <template>
-  <div class="container">
+  <div v-if="store.username" class="container">
     <div class="header">
       <h1 class="title">Recipe Explorer</h1>
       <p class="subtitle">Discover delicious recipes for any occasion</p>
     </div>
     
     <div class="section">
-      <h2 class="section-title">Random Recipes</h2>
-      <RecipePreviewList title="" class="recipe-list" />
+      <div class="section-header">
+        <h2 class="section-title">Random Recipes</h2>
+        <button @click="shuffleRecipes" class="shuffle-button">
+          <i class="fas fa-random"></i> Shuffle
+        </button>
+      </div>
+      <RecipePreviewList ref="recipeList" title="" class="recipe-list" />
     </div>
-    
-    <div v-if="!store.username" class="login-prompt">
+  </div>
+  
+  <!-- Locked page for non-signed-in users -->
+  <div v-else class="container locked-container">
+    <div class="login-prompt">
       <div class="login-prompt-content">
         <i class="fas fa-lock login-icon"></i>
+        <h2>Recipe Explorer</h2>
         <h3>Access Your Personal Recipe Collection</h3>
-        <p>Sign in to view your recently viewed recipes and favorites</p>
+        <p>Sign in to explore random recipes and create your favorites</p>
         <router-link :to="{ name: 'login' }" class="login-button">
           <i class="fas fa-sign-in-alt"></i> Login
         </router-link>
-      </div>
-    </div>
-    
-    <div class="section">
-      <h2 class="section-title">Last Viewed Recipes</h2>
-      <RecipePreviewList
-        title=""
-        :class="{
-          'recipe-list': true,
-          'blur-content': !store.username
-        }"
-        disabled
-      />
-      
-      <div v-if="!store.username" class="blur-overlay">
-        <div class="overlay-content">
-          <i class="fas fa-user-lock"></i>
-          <p>Login to see your viewed recipes</p>
-        </div>
+        <div class="or-divider">or</div>
+        <router-link :to="{ name: 'register' }" class="register-button">
+          <i class="fas fa-user-plus"></i> Register
+        </router-link>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { getCurrentInstance } from 'vue';
+import { getCurrentInstance, ref } from 'vue';
 import RecipePreviewList from "../components/RecipePreviewList.vue";
 
 export default {
@@ -54,8 +48,20 @@ export default {
   setup() {
     const internalInstance = getCurrentInstance();
     const store = internalInstance.appContext.config.globalProperties.store;
+    const recipeList = ref(null);
 
-    return { store };
+    // Method to shuffle recipes by triggering updateRecipes in RecipePreviewList
+    const shuffleRecipes = () => {
+      if (recipeList.value) {
+        recipeList.value.updateRecipes();
+      }
+    };
+
+    return { 
+      store,
+      recipeList,
+      shuffleRecipes
+    };
   }
 };
 </script>
@@ -100,26 +106,73 @@ export default {
   position: relative;
 }
 
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 .section-title {
   font-size: 1.8rem;
   font-weight: 600;
   color: #333;
-  margin-bottom: 20px;
-  text-align: center;
+  margin-bottom: 0;
 }
 
 .recipe-list {
   margin: 20px 0;
 }
 
+/* Shuffle Button */
+.shuffle-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.shuffle-button:hover {
+  background-color: #0d62c9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.shuffle-button:active {
+  transform: translateY(0);
+}
+
+.shuffle-button i {
+  font-size: 1.1rem;
+}
+
+/* Locked Container */
+.locked-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+}
+
 /* Login Prompt */
 .login-prompt {
   background-color: #f0f5ff;
   border-radius: 16px;
-  padding: 30px;
+  padding: 40px;
   margin: 40px 0;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
 }
 
 .login-prompt-content {
@@ -128,9 +181,16 @@ export default {
 }
 
 .login-icon {
-  font-size: 3rem;
+  font-size: 3.5rem;
   color: #1a73e8;
   margin-bottom: 20px;
+}
+
+.login-prompt h2 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #1a73e8;
+  margin-bottom: 15px;
 }
 
 .login-prompt h3 {
@@ -142,57 +202,57 @@ export default {
 
 .login-prompt p {
   color: #666;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  font-size: 1.1rem;
 }
 
-.login-button {
+.login-button, .register-button {
   display: inline-block;
   padding: 12px 24px;
-  background-color: #1a73e8;
-  color: white;
   text-decoration: none;
   border-radius: 8px;
   font-weight: 500;
-  transition: background-color 0.3s;
+  transition: all 0.3s;
+  width: 100%;
+  max-width: 250px;
+}
+
+.login-button {
+  background-color: #1a73e8;
+  color: white;
 }
 
 .login-button:hover {
   background-color: #0d62c9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Blur Effect */
-.blur-content {
-  filter: blur(4px);
-  pointer-events: none;
+.register-button {
+  background-color: #34a853;
+  color: white;
 }
 
-.blur-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255, 255, 255, 0.6);
+.register-button:hover {
+  background-color: #2d8e47;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.or-divider {
   display: flex;
-  justify-content: center;
   align-items: center;
-  border-radius: 16px;
-  pointer-events: none;
-}
-
-.overlay-content {
-  text-align: center;
-  color: #1a73e8;
-}
-
-.overlay-content i {
-  font-size: 3rem;
-  margin-bottom: 15px;
-}
-
-.overlay-content p {
-  font-size: 1.2rem;
+  margin: 20px 0;
+  color: #666;
   font-weight: 500;
+}
+
+.or-divider::before,
+.or-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid #ddd;
+  margin: 0 15px;
 }
 
 /* Transitions */

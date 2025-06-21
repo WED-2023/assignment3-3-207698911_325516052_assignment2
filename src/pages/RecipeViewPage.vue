@@ -92,8 +92,9 @@
           <button class="btn btn-outline-primary" @click="$router.go(-1)">
             <i class="fas fa-arrow-left me-2"></i> Back
           </button>
-          <button class="btn btn-primary">
-            <i class="far fa-bookmark me-2"></i> Save Recipe
+          <button class="btn btn-primary" @click="toggleFavorite" :disabled="isToggling">
+            <i :class="isFavorite ? 'fas fa-heart text-danger' : 'far fa-heart me-2'"></i> 
+            {{ isFavorite ? 'Remove from Favorites' : 'Add to Favorites' }}
           </button>
         </div>
       </div>
@@ -111,11 +112,15 @@
 </template>
 
 <script>
+import favoritesService from '../services/favoritesService';
+
 export default {
   name: "RecipeViewPage",
   data() {
     return {
-      recipe: null
+      recipe: null,
+      isFavorite: false,
+      isToggling: false
     };
   },
   async created() {
@@ -233,12 +238,46 @@ export default {
       
       // Save viewed recipe to localStorage
       this.saveViewedRecipe(_recipe);
+      
+      // Check if recipe is in favorites
+      this.checkFavoriteStatus(_recipe.id);
     } catch (error) {
       console.error("Error processing recipe data:", error);
       this.$router.replace("/NotFound");
     }
   },
   methods: {
+    async checkFavoriteStatus(recipeId) {
+      if (!this.$root.store.username) return;
+      
+      try {
+        const result = await favoritesService.isInFavorites(recipeId);
+        this.isFavorite = result;
+      } catch (error) {
+        console.error("Error checking favorite status:", error);
+      }
+    },
+    
+    async toggleFavorite() {
+      if (!this.$root.store.username || this.isToggling) return;
+      
+      this.isToggling = true;
+      
+      try {
+        if (this.isFavorite) {
+          await favoritesService.removeFromFavorites(this.recipe.id);
+          this.isFavorite = false;
+        } else {
+          await favoritesService.addToFavorites(this.recipe.id);
+          this.isFavorite = true;
+        }
+      } catch (error) {
+        console.error("Error toggling favorite status:", error);
+      } finally {
+        this.isToggling = false;
+      }
+    },
+    
     saveViewedRecipe(recipe) {
       try {
         // Get existing viewed recipes from localStorage
