@@ -125,7 +125,15 @@ export default {
 
       try {
         // Use the base URL from the store
-        response = await this.axios.get(`${this.$root.store.server_domain}/recipes/${recipeId}`);
+        //distinguish between user recipe starts with user_ and public recipe
+        if (recipeId.startsWith("user_")) {
+          // Fetch user-specific recipe
+          const recipe_id = recipeId.split("user_")[1];
+          response = await this.axios.get(`${this.$root.store.server_domain}/users/${this.$root.store.username}/recipes/${recipe_id}`);
+        } else {
+          // Fetch public recipe
+          response = await this.axios.get(`${this.$root.store.server_domain}/recipes/${recipeId}`);
+        }
         console.log("API Response:", response.data);
         
         if (response.status !== 200) {

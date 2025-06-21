@@ -82,7 +82,7 @@ export default {
         error.value = error.message || "Failed to fetch recipes";
         
         // For testing/debugging - add some mock recipes if API fails
-        addMockRecipes();
+        // addMockRecipes();
       } finally {
         loading.value = false;
       }
@@ -112,7 +112,7 @@ export default {
       } else {
         console.error("Could not find recipes array in response:", response.data);
         // For testing/debugging - add some mock data if response structure is unexpected
-        addMockRecipes();
+        // addMockRecipes();
         return;
       }
       
@@ -143,44 +143,44 @@ export default {
       console.log("Final recipes array:", recipes.value);
     };
     
-    const addMockRecipes = () => {
-      console.log("Adding mock recipes for testing");
-      recipes.value = [
-        {
-          id: 1,
-          title: "Spaghetti Carbonara",
-          readyInMinutes: 30,
-          image: "https://spoonacular.com/recipeImages/715538-312x231.jpg",
-          aggregateLikes: 42,
-          vegetarian: false,
-          vegan: false,
-          glutenFree: false,
-          dairyFree: false
-        },
-        {
-          id: 2,
-          title: "Chicken Parmesan",
-          readyInMinutes: 45,
-          image: "https://spoonacular.com/recipeImages/716429-312x231.jpg", 
-          aggregateLikes: 36,
-          vegetarian: false,
-          vegan: false,
-          glutenFree: false,
-          dairyFree: false
-        },
-        {
-          id: 3,
-          title: "Vegetable Stir Fry",
-          readyInMinutes: 20,
-          image: "https://spoonacular.com/recipeImages/716429-312x231.jpg",
-          aggregateLikes: 28,
-          vegetarian: true,
-          vegan: true,
-          glutenFree: true,
-          dairyFree: true
-        }
-      ];
-    };
+    // const addMockRecipes = () => {
+    //   console.log("Adding mock recipes for testing");
+    //   recipes.value = [
+    //     {
+    //       id: 1,
+    //       title: "Spaghetti Carbonara",
+    //       readyInMinutes: 30,
+    //       image: "https://spoonacular.com/recipeImages/715538-312x231.jpg",
+    //       aggregateLikes: 42,
+    //       vegetarian: false,
+    //       vegan: false,
+    //       glutenFree: false,
+    //       dairyFree: false
+    //     },
+    //     {
+    //       id: 2,
+    //       title: "Chicken Parmesan",
+    //       readyInMinutes: 45,
+    //       image: "https://spoonacular.com/recipeImages/716429-312x231.jpg", 
+    //       aggregateLikes: 36,
+    //       vegetarian: false,
+    //       vegan: false,
+    //       glutenFree: false,
+    //       dairyFree: false
+    //     },
+    //     {
+    //       id: 3,
+    //       title: "Vegetable Stir Fry",
+    //       readyInMinutes: 20,
+    //       image: "https://spoonacular.com/recipeImages/716429-312x231.jpg",
+    //       aggregateLikes: 28,
+    //       vegetarian: true,
+    //       vegan: true,
+    //       glutenFree: true,
+    //       dairyFree: true
+    //     }
+    //   ];
+    // };
     
     onMounted(() => {
       if (!props.disabled) {

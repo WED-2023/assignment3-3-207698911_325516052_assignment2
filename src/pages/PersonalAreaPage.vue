@@ -29,17 +29,7 @@
                 <h3 class="h5 fw-bold">My Favorites</h3>
                 <p class="text-muted small">View your saved recipes</p>
               </div>
-            </router-link>
-          </div>
-          <div class="col-md-4">
-            <router-link to="/meal-planner" class="quick-action-card card border-0 shadow-sm h-100">
-              <div class="card-body text-center p-4">
-                <i class="fas fa-calendar-week action-icon text-success mb-3"></i>
-                <h3 class="h5 fw-bold">Meal Planner</h3>
-                <p class="text-muted small">Plan your meals for the week</p>
-              </div>
-            </router-link>
-          </div>
+            </router-link>          </div>
           <div class="col-md-4 mt-4">
             <router-link to="/family-recipes" class="quick-action-card card border-0 shadow-sm h-100">
               <div class="card-body text-center p-4">
@@ -152,56 +142,120 @@
           <button class="btn btn-success mt-3" @click="openRecipeCreationModal">
             <i class="fas fa-plus me-2"></i>Create Recipe
           </button>
-        </div>
-        <div v-else class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-          <div v-for="recipe in myRecipes" :key="recipe.id" class="col">
-            <div class="card h-100 recipe-card border-0 shadow-sm">
-              <div class="position-relative overflow-hidden recipe-image-wrapper">
-                <img 
-                  v-if="recipe.image" 
-                  :src="recipe.image" 
-                  :alt="recipe.title" 
-                  class="card-img-top recipe-image"
-                />
-                <div v-else class="recipe-image-placeholder">
-                  <i class="fas fa-utensils"></i>
+        </div>        <div v-else>
+          <div v-if="!showAllRecipes" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <div v-for="recipe in myRecipes.slice(0, 3)" :key="recipe.id" class="col">
+              <div class="card h-100 recipe-card border-0 shadow-sm">
+                <div class="position-relative overflow-hidden recipe-image-wrapper">
+                  <img 
+                    v-if="recipe.image" 
+                    :src="recipe.image" 
+                    :alt="recipe.title" 
+                    class="card-img-top recipe-image"
+                  />
+                  <div v-else class="recipe-image-placeholder">
+                    <i class="fas fa-utensils"></i>
+                  </div>
+                  
+                  <!-- Recipe badges -->
+                  <div class="recipe-badges">
+                    <span v-if="recipe.vegan" class="badge bg-success me-1">
+                      <i class="fas fa-seedling me-1"></i>Vegan
+                    </span>
+                    <span v-else-if="recipe.vegetarian" class="badge bg-info me-1">
+                      <i class="fas fa-leaf me-1"></i>Vegetarian
+                    </span>
+                    <span v-if="recipe.glutenFree" class="badge bg-warning text-dark me-1">
+                      <i class="fas fa-bread-slice me-1"></i>Gluten-Free
+                    </span>
+                  </div>
                 </div>
-                
-                <!-- Recipe badges -->
-                <div class="recipe-badges">
-                  <span v-if="recipe.vegan" class="badge bg-success me-1">
-                    <i class="fas fa-seedling me-1"></i>Vegan
-                  </span>
-                  <span v-else-if="recipe.vegetarian" class="badge bg-info me-1">
-                    <i class="fas fa-leaf me-1"></i>Vegetarian
-                  </span>
-                  <span v-if="recipe.glutenFree" class="badge bg-warning text-dark me-1">
-                    <i class="fas fa-bread-slice me-1"></i>Gluten-Free
-                  </span>
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title fw-bold">{{ recipe.title }}</h5>                <div class="recipe-meta mb-3">
+                    <span v-if="recipe.readyInMinutes" class="meta-item me-3">
+                      <i class="far fa-clock text-primary me-1"></i> {{ recipe.readyInMinutes }} min
+                    </span>
+                    <span class="meta-item">
+                      <i class="fas fa-utensils text-success me-1"></i> My Recipe
+                    </span>
+                  </div>
+                  <router-link 
+                    v-if="recipe.id" 
+                    :to="{ name: 'recipe', params: { recipeId: 'user_' + recipe.id } }" 
+                    class="btn btn-primary mt-auto">
+                    View Recipe Details
+                  </router-link>
+                  <button 
+                    v-else 
+                    class="btn btn-secondary mt-auto" 
+                    @click="alert('Recipe ID not available. Cannot view details.')">
+                    View Recipe Details
+                  </button>
                 </div>
               </div>
-              <div class="card-body d-flex flex-column">
-                <h5 class="card-title fw-bold">{{ recipe.title }}</h5>                <div class="recipe-meta mb-3">
-                  <span v-if="recipe.readyInMinutes" class="meta-item me-3">
-                    <i class="far fa-clock text-primary me-1"></i> {{ recipe.readyInMinutes }} min
-                  </span>
-                  <span class="meta-item">
-                    <i class="fas fa-utensils text-success me-1"></i> My Recipe
-                  </span>
+            </div>
+            <div class="col-12 text-center mt-4" v-if="myRecipes.length > 3">
+              <button class="btn btn-outline-primary" @click="showAllRecipes = true">
+                <i class="fas fa-list me-2"></i>View All My Recipes ({{ myRecipes.length }})
+              </button>
+            </div>
+          </div>
+          
+          <div v-else class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <div v-for="recipe in myRecipes" :key="recipe.id" class="col">
+              <div class="card h-100 recipe-card border-0 shadow-sm">
+                <div class="position-relative overflow-hidden recipe-image-wrapper">
+                  <img 
+                    v-if="recipe.image" 
+                    :src="recipe.image" 
+                    :alt="recipe.title" 
+                    class="card-img-top recipe-image"
+                  />
+                  <div v-else class="recipe-image-placeholder">
+                    <i class="fas fa-utensils"></i>
+                  </div>
+                  
+                  <!-- Recipe badges -->
+                  <div class="recipe-badges">
+                    <span v-if="recipe.vegan" class="badge bg-success me-1">
+                      <i class="fas fa-seedling me-1"></i>Vegan
+                    </span>
+                    <span v-else-if="recipe.vegetarian" class="badge bg-info me-1">
+                      <i class="fas fa-leaf me-1"></i>Vegetarian
+                    </span>
+                    <span v-if="recipe.glutenFree" class="badge bg-warning text-dark me-1">
+                      <i class="fas fa-bread-slice me-1"></i>Gluten-Free
+                    </span>
+                  </div>
                 </div>
-                <router-link 
-                  v-if="recipe.id" 
-                  :to="{ name: 'recipe', params: { recipeId: recipe.id } }" 
-                  class="btn btn-primary mt-auto">
-                  View Recipe Details
-                </router-link>
-                <button 
-                  v-else 
-                  class="btn btn-secondary mt-auto" 
-                  @click="alert('Recipe ID not available. Cannot view details.')">
-                  View Recipe Details
-                </button>
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title fw-bold">{{ recipe.title }}</h5>                <div class="recipe-meta mb-3">
+                    <span v-if="recipe.readyInMinutes" class="meta-item me-3">
+                      <i class="far fa-clock text-primary me-1"></i> {{ recipe.readyInMinutes }} min
+                    </span>
+                    <span class="meta-item">
+                      <i class="fas fa-utensils text-success me-1"></i> My Recipe
+                    </span>
+                  </div>
+                  <router-link 
+                    v-if="recipe.id" 
+                    :to="{ name: 'recipe', params: { recipeId: recipe.id } }" 
+                    class="btn btn-primary mt-auto">
+                    View Recipe Details
+                  </router-link>
+                  <button 
+                    v-else 
+                    class="btn btn-secondary mt-auto" 
+                    @click="alert('Recipe ID not available. Cannot view details.')">
+                    View Recipe Details
+                  </button>
+                </div>
               </div>
+            </div>
+            <div class="col-12 text-center mt-4">
+              <button class="btn btn-outline-secondary" @click="showAllRecipes = false">
+                <i class="fas fa-compress-alt me-2"></i>Show Less
+              </button>
             </div>
           </div>
         </div>
@@ -223,12 +277,12 @@ export default {
   components: {
     RecipeCreationModal
   },
-  data() {
-    return {
+  data() {    return {
       viewedRecipes: [],
       favoriteRecipes: [],
       myRecipes: [],
-      myCollections: []
+      myCollections: [],
+      showAllRecipes: false
     };
   },
   setup() {
@@ -277,45 +331,7 @@ export default {
         this.myRecipes = [];
       }
       
-      // Mock viewed recipes
-      this.viewedRecipes = [
-        {
-          id: 1,
-          title: "Homemade Pizza",
-          readyInMinutes: 45,
-          image: "https://spoonacular.com/recipeImages/715538-312x231.jpg",
-          aggregateLikes: 220,
-          vegetarian: true,
-          vegan: false,
-          glutenFree: false
-        },
-        {
-          id: 2,
-          title: "Spinach and Mushroom Lasagna",
-          readyInMinutes: 60,
-          image: "https://spoonacular.com/recipeImages/716429-312x231.jpg",
-          aggregateLikes: 158,
-          vegetarian: true,
-          vegan: false,
-          glutenFree: false
-        },
-        {
-          id: 3,
-          title: "Grilled Salmon with Avocado Salsa",
-          readyInMinutes: 30,
-          image: "https://spoonacular.com/recipeImages/716426-312x231.jpg",
-          aggregateLikes: 175,
-          vegetarian: false,
-          vegan: false,
-          glutenFree: true
-        }
-      ];
-      
-      // Mock collections
-      this.myCollections = [
-        { id: 1, name: "Weeknight Dinners" },
-        { id: 2, name: "Healthy Breakfast" }
-      ];
+      this.viewedRecipes = [];
     },
     
     openRecipeCreationModal() {
@@ -433,5 +449,15 @@ export default {
 
 .cursor-pointer {
   cursor: pointer;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: -1;
 }
 </style>
