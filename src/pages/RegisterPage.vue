@@ -442,7 +442,7 @@ export default {
         // }
         
         // Proceed with registration
-        const baseURL = window.store.server_domain || 'http://localhost:3000';
+        const baseURL = window.store.server_domain;
         await window.axios.post(`${baseURL}/register`, {
           username: state.username,
           firstname: state.firstName,

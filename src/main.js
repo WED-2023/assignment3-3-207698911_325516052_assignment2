@@ -13,6 +13,10 @@ import store from './store';
 
 // Set up Axios with default configs
 axios.defaults.withCredentials = true;
+axios.defaults.baseURL = "https://guy-dan-site.cs.bgu.ac.il/"
+// axios.defaults.baseURL = process.env.NODE_ENV === 'production'
+//   ? "https://guy-dan-site.cs.bgu.ac.il/"
+//   : "http://localhost:3000";
 
 // Add request interceptor for debugging
 axios.interceptors.request.use(

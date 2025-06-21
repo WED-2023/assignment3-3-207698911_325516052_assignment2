@@ -128,7 +128,7 @@ export default {
           });
           
           // Use the baseURL from the store
-          const baseURL = window.store.server_domain || 'http://localhost:3000';
+          const baseURL = window.store.server_domain ;
           console.log("Using server URL:", baseURL);
           
           const response = await axios.post(`${baseURL}/login`, {
